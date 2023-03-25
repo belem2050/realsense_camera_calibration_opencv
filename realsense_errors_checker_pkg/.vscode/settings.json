@@ -1,0 +1,16 @@
+{
+    "files.associations": {
+        "string": "cpp"
+    },
+    "ros.distro": "humble",
+    "python.autoComplete.extraPaths": [
+        "/home/belem/Desktop/ws/install/realsense2_camera_msgs/local/lib/python3.10/dist-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/belem/Desktop/ws/install/realsense2_camera_msgs/local/lib/python3.10/dist-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ]
+}
