@@ -7,12 +7,11 @@ import time
 
 import pyrealsense2 as rs
 
-t =[]
 
 class CameraCalibration():
     def __init__(self) -> None:
 
-        self.board_size = (11,8)
+        self.board_size = (10,8)
         # termination criteria
         self.criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
         # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
@@ -22,6 +21,7 @@ class CameraCalibration():
         self.objpoints = [] # 3d point in real world space
         self.imgpoints = [] # 2d points in image plane.
         self.captured_images_dir = "captured_images"
+        self.corners_found_images_dir = "corners_images"
 
 
     def rs_setup(self):
@@ -31,20 +31,21 @@ class CameraCalibration():
         self.config.enable_stream(rs.stream.color, 640, 480, rs.format.rgb8, 30)
 
 
-    def save_image(self, color_image, image_number):
+    def save_image(self, color_image, image_number, dir):
+        if not os.path.exists(dir):
+            os.makedirs(dir)
 
-        if not os.path.exists(self.captured_images_dir):
-            os.makedirs(self.captured_images_dir)
-
-        filename = os.path.join(self.captured_images_dir,f"image_{image_number}.png")
+        filename = os.path.join(dir,f"image_{image_number}.png")
         cv2.imwrite(filename, color_image)
-        print(image_number)
 
+    def remove_dir(self):
+        if os.path.exists(self.captured_images_dir):
+            os.removedirs(self.captured_images_dir)
 
 
     def images_aquision(self, images_number, delay):   
         
-        image_number = 1     
+        image_number = 51     
         try:
             self.pipeline.start(self.config)
 
@@ -53,29 +54,31 @@ class CameraCalibration():
                 frame = self.pipeline.wait_for_frames()
                 color_frame  = frame.get_color_frame()
                 color_image = np.asanyarray(color_frame.get_data())
-                self.save_image(color_image, image_number)
-        
+                self.save_image(color_image, image_number, self.captured_images_dir)
+
+                print(f"image {image_number}")
                 time.sleep(delay)
                 image_number += 1
-
             self.pipeline.stop()
-
         except :
             print("Error")
 
 
-    def calibration(self):
+    def calibrate(self):
     
         captured_images = os.listdir(self.captured_images_dir)
+        image_number = 0
+    
        
         for captured_image in captured_images:
             filename = os.path.join(self.captured_images_dir,captured_image)
-            print(filename)
+            #print(filename)
+
             image = cv2.imread(filename)
             #print(captured_image)
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             found, corners = cv2.findChessboardCorners(gray, self.board_size, None)
-            print(f"found: {found}")
+            #print(f"found: {found}")
 
             if found:
                 self.objpoints.append(self.objp)
@@ -84,23 +87,46 @@ class CameraCalibration():
                 # Draw and display the corners
                 cv2.drawChessboardCorners(image, self.board_size, corners2, True)
                 cv2.imshow(f"{captured_image}", image)
-                cv2.waitKey()
-            print(self.objpoints)
+                self.save_image(image, image_number, self.corners_found_images_dir)
+                cv2.waitKey(1000)
+        #print(self.objpoints)
+                image_number += 1
 
         #calibrate the camera
-        ret, mtx, dist, rvecs, tvecs , stdDeviationsIntrinsics= cv2.calibrateCamera(self.objpoints, self.imgpoints, gray.shape[::-1], None, None)
-        # print("ret: ", ret)
-        print("mtx: ", mtx)
-        print("dist: ", dist)
-        print("stdDeviationsIntrinsics: ", stdDeviationsIntrinsics)
+        try :
+            ret, mtx, dist, rvecs ,tvecs= cv2.calibrateCamera(self.objpoints, self.imgpoints, gray.shape[::-1], None, None)
+            print(f"ret: {ret}\n")
+            print(f"mtx:\n {mtx}\n")
+            print(f"dist: {dist}\n")
+            #print("stdDeviationsIntrinsics: ", stdDeviationsIntrinsics)
+            #return mtx, dist, stdDeviationsIntrinsics
+            return ret, mtx, dist, rvecs, tvecs
+        except :
+            print("Not calibrated")
 
-        return mtx, dist
+
+    def get_serial_number(self):
+        try:
+            context = rs.context()
+            devices = context.query_devices()
+            if len(devices) == 0:
+                raise Exception("No RealSense devices found.")
+            else:
+                serial_number = devices[0].get_info(rs.camera_info.serial_number)
+                return serial_number
+        except Exception as e:
+            print("Error:", e)
+            return None
+
+        
 
 def main():
         cameraCalib =CameraCalibration()
+        #cameraCalib.remove_dir()
         #cameraCalib.rs_setup()
-        #cameraCalib.images_aquision(images_number=10, delay=0.5)
-        cameraCalib.calibration()
+        #cameraCalib.images_aquision(images_number=100, delay=2)
+        cameraCalib.calibrate()
+        #print(f"realsense serial number: {cameraCalib.get_serial_number()}")
 
 
 if __name__ =="__main__":

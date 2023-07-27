@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<Config>
+    <param name = "ResolutionRGB">
+        <value>640</value>
+        <value>480</value>
+    </param>
+    <param name = "FocalLengthRGB">
+        <value>601.800</value>
+        <value>602.008</value>
+    </param>
+    <param name = "PrincipalPointRGB">
+        <value>322.39</value>
+        <value>244.35</value>
+    </param>
+    <param name = "DistortionRGB">
+        <value>0.099</value>
+        <value>-0.038</value>
+        <value>0.0010</value>
+        <value>0.0013</value>
+        <value>-0.510</value>
+    </param>
+</Config>
