@@ -6,7 +6,7 @@ import os
 import time
 
 import pyrealsense2 as rs
-
+import argparse
 
 class CameraCalibration():
     def __init__(self) -> None:
@@ -45,7 +45,7 @@ class CameraCalibration():
 
     def images_aquision(self, images_number, delay):   
         
-        image_number = 51     
+        image_number = 1    
         try:
             self.pipeline.start(self.config)
 
@@ -121,12 +121,29 @@ class CameraCalibration():
         
 
 def main():
+
+        parser = argparse.ArgumentParser(description='Arguments for calibration script run')
+        parser.add_argument("--i", type=str, help="set True if images acquisition need for calibration ", default="False")
+        parser.add_argument("--n", type=int, help="number of images to acquire", default=10)
+        parser.add_argument("--d", type=int, help="delay between images pitchuring", default=2)  
+        parser.add_argument("--serial_number", type=str, help="delay between images pitchuring", default="False")  
+
+
+        
         cameraCalib =CameraCalibration()
-        #cameraCalib.remove_dir()
-        #cameraCalib.rs_setup()
-        #cameraCalib.images_aquision(images_number=100, delay=2)
+        args = parser.parse_args()
+        
+        if args.serial_number == "True" :
+            print(f"serial number : {cameraCalib.get_serial_number()}")
+            return
+
+        if  args.i == "False" :
+            cameraCalib.calibrate()
+            return
+
+        cameraCalib.rs_setup()
+        cameraCalib.images_aquision(args.n, args.d)
         cameraCalib.calibrate()
-        #print(f"realsense serial number: {cameraCalib.get_serial_number()}")
 
 
 if __name__ =="__main__":
