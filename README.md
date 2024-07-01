@@ -46,6 +46,3 @@ To upload  with the serial number and the .xml file updated with the new obtaine
     /usr/bin/Intel.Realsense.CustomRW -sn {serial_number} -r 
     
  Realsense Camera Calibrated 🎉 🎉 🎉 !!!!!!!
-## License
-Coalescent Mobile Robotics
-
