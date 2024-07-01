@@ -1,6 +1,0 @@
-realsense_health_checker:
-  ros__parameters:
-    topic_name : "/topic"
-    error_file_name: "realsense_errors"
-    error_file_directory: "/home/belem/Desktop/ws/src/CMR-Intership/realsense_health_checker/src"
-    error_file_extension: "txt"
